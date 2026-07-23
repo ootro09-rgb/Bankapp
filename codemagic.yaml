@@ -31,9 +31,3 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      email:
-        recipients: []
-        notify:
-          success: true
-          failure: true
