@@ -1,0 +1,1291 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BlunarKBank — Prototipo</title>
+<style>
+:root{
+  --bg:#07090d;--panel:#11151c;--panel2:#171c25;--line:#252c38;
+  --txt:#f7f9fc;--muted:#919bad;--blue:#2f7df6;--green:#22c55e;--red:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#dfe5ec;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+#phone{width:min(430px,100vw);height:100dvh;margin:auto;background:var(--bg);color:var(--txt);overflow:hidden;position:relative}
+.status{height:34px;padding:8px 17px;display:flex;justify-content:space-between;font-size:12px}
+.globalTools{
+  position:absolute;right:14px;top:39px;z-index:25;display:flex;gap:9px;
+  padding:6px;border-radius:16px;background:rgba(7,9,13,.82);
+  border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(12px)
+}
+.globalTools.hidden{display:none}
+.screen:not(.auth){padding-top:72px}
+.screen{display:none;height:calc(100dvh - 34px);overflow-y:auto;padding:18px 18px 105px}
+.screen.active{display:block}
+.auth{padding-bottom:24px}
+h1{margin:4px 0 8px;font-size:29px} h2{font-size:20px;margin:22px 0 12px}
+p{color:var(--muted);line-height:1.45}
+.logo{width:82px;height:82px;border-radius:24px;background:linear-gradient(135deg,#316ef5,#6237df);display:grid;place-items:center;font-size:38px;margin:32px auto 18px}
+label{font-size:13px;color:#c4cbd6;display:block;margin-top:14px}
+input,select{width:100%;margin-top:7px;border:1px solid var(--line);background:#0d1117;color:white;border-radius:14px;padding:14px;font-size:16px;outline:none}
+button{font:inherit}
+.btn{width:100%;padding:15px;border:0;border-radius:15px;color:white;background:var(--blue);font-weight:750;margin-top:13px;cursor:pointer}
+.btn.secondary{background:var(--panel2);border:1px solid var(--line)}
+.btn.danger{background:var(--red)}
+.btn.green{background:var(--green)}
+.link{border:0;background:none;color:#70a7ff;padding:12px;cursor:pointer}
+.header{display:flex;align-items:center;justify-content:space-between}
+.pageHeader{
+  display:grid;grid-template-columns:48px minmax(0,1fr) 48px;
+  align-items:center;gap:8px;min-height:48px
+}
+.pageHeader h1,.pageHeader h2{
+  margin:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.backBtn{
+  width:42px;height:42px;margin:0;padding:0;border:1px solid var(--line);
+  border-radius:13px;background:var(--panel2);color:white;font-size:27px;
+  display:grid;place-items:center;cursor:pointer
+}
+.pageHeader .rightSpace{width:42px;height:42px}
+.iconbtn{border:0;background:var(--panel);color:white;border-radius:12px;width:42px;height:42px;font-size:21px;cursor:pointer}
+.row{display:flex;gap:12px}
+.stat{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{display:block;font-size:22px;margin-top:5px}
+.card{
+  min-height:170px;border-radius:21px;padding:18px;margin-bottom:14px;
+  background:linear-gradient(135deg,#183e78,#0d1b32 60%,#111827);
+  border:1px solid #27466e;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer
+}
+.card.purple{background:linear-gradient(135deg,#4b1f67,#1b1025 60%,#111);border-color:#653681}
+.card.bank-BANMET{
+  color:#101820;
+  background:
+    linear-gradient(90deg,rgba(103,255,22,.92) 0 100%) top/100% 29% no-repeat,
+    linear-gradient(135deg,#f1f1ed 0%,#d9ddd8 58%,#c9cec9 100%);
+  border-color:#a9b3aa;
+}
+.card.bank-BANMET::before{
+  content:"bm";
+  position:absolute;left:18px;top:17px;
+  font-weight:1000;font-size:28px;letter-spacing:-4px;color:#111;
+}
+.card.bank-BPA{
+  color:#164d1b;
+  background:
+    linear-gradient(7deg,transparent 0 48%,rgba(16,128,32,.95) 49% 53%,transparent 54% 59%,rgba(15,107,25,.78) 60% 64%,transparent 65%),
+    linear-gradient(135deg,#ffffff 0%,#eff7ef 64%,#dcebdc 100%);
+  border-color:#9ac99c;
+}
+.card.bank-BPA::before{
+  content:"bpa";
+  position:absolute;left:18px;top:16px;
+  font-style:italic;font-weight:1000;font-size:28px;color:#176f26;
+}
+.card.bank-BANDEC{
+  color:#fff;
+  background:
+    linear-gradient(0deg,rgba(255,255,255,.10),rgba(255,255,255,.10)) center 50%/100% 26% no-repeat,
+    linear-gradient(135deg,#8b0d18 0%,#b3192a 47%,#700713 100%);
+  border-color:#d54d58;
+}
+.card.bank-BANDEC::before{
+  content:"◉ bandec.";
+  position:absolute;left:18px;top:17px;
+  font-weight:900;font-size:21px;letter-spacing:.4px;color:#fff;
+}
+.bankBrand{
+  font-size:12px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;
+  background:rgba(255,255,255,.72);border:1px solid rgba(20,50,75,.16);
+  padding:6px 9px;border-radius:999px;backdrop-filter:blur(5px)
+}
+.cardChip{
+  width:43px;height:31px;border-radius:7px;margin-bottom:13px;
+  background:
+    linear-gradient(90deg,transparent 31%,rgba(86,64,13,.5) 32% 35%,transparent 36% 64%,rgba(86,64,13,.5) 65% 68%,transparent 69%),
+    linear-gradient(0deg,transparent 44%,rgba(86,64,13,.5) 45% 50%,transparent 51%),
+    linear-gradient(135deg,#f8da72,#b68a24);
+  border:1px solid rgba(80,56,10,.55)
+}
+.cardWatermark{
+  position:absolute;right:-12px;bottom:-22px;font-size:100px;opacity:.08;transform:rotate(-12deg);
+  pointer-events:none
+}
+.card{position:relative;overflow:hidden}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
+.left{display:flex;align-items:center;gap:12px}
+.ico{width:42px;height:42px;border-radius:13px;background:#172338;display:grid;place-items:center;font-size:20px}
+small{color:var(--muted)}
+.badge{padding:5px 9px;border-radius:999px;background:#123b23;color:#62e88d;font-size:12px}
+.nav{position:absolute;bottom:0;left:0;right:0;height:84px;background:rgba(11,14,19,.97);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:9px 6px 17px}
+.floatingAction{
+  position:absolute;right:20px;bottom:100px;z-index:24;width:66px;height:66px;border-radius:22px;
+  border:0;background:linear-gradient(135deg,#2f7df6,#6846e8);color:white;font-size:27px;
+  box-shadow:0 14px 32px rgba(47,125,246,.42);cursor:pointer
+}
+.floatingAction.hidden{display:none}
+.floatingAction small{display:block;font-size:8px;margin-top:1px;color:white}
+.nav button{border:0;background:none;color:#7f8998;font-size:10px;cursor:pointer}
+.nav button span{display:grid;place-items:center;margin:0 auto 4px}
+.svgIcon{width:22px;height:22px;display:inline-grid;place-items:center;color:currentColor;flex:0 0 auto}
+.svgIcon svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ico .svgIcon{width:21px;height:21px}
+.logo .svgIcon{width:42px;height:42px}
+.floatingAction>.svgIcon{width:23px;height:23px;margin:auto}
+.nav button.active{color:var(--blue)}
+.nav .middle{width:58px;height:58px;border-radius:19px;background:var(--blue);color:white;margin:-28px auto 0}
+.scan{height:430px;background:radial-gradient(circle at 50% 45%,#1b2430,#060708 62%);border:1px solid #222;border-radius:22px;display:grid;place-items:center;position:relative;overflow:hidden}
+.frame{width:250px;height:165px;border:3px solid var(--red);border-radius:18px;box-shadow:0 0 0 1000px rgba(0,0,0,.25)}
+.line{position:absolute;width:220px;height:2px;background:var(--red);animation:scan 1.8s infinite alternate ease-in-out}
+@keyframes scan{from{transform:translateY(-66px)}to{transform:translateY(66px)}}
+.modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:30;align-items:flex-end}
+.modal.open{display:flex}
+.sheet{width:100%;background:#10151c;border-radius:24px 24px 0 0;padding:22px 18px 28px;max-height:85dvh;overflow:auto}
+.toast{position:absolute;z-index:40;left:50%;bottom:102px;transform:translateX(-50%);background:#1a2330;border:1px solid #344154;border-radius:13px;padding:12px 15px;display:none;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+.qr{width:220px;height:220px;background:white;border-radius:16px;margin:20px auto;padding:12px;display:grid;grid-template-columns:repeat(21,1fr);grid-template-rows:repeat(21,1fr)}
+.qr i{background:transparent}.qr i.on{background:#000}
+.switch{width:48px;height:29px;border-radius:99px;background:#2d3542;padding:3px}
+.switch i{display:block;width:23px;height:23px;border-radius:50%;background:white;transition:.2s}
+.switch.on{background:var(--green)} .switch.on i{transform:translateX(19px)}
+.cardTop{display:flex;align-items:center;justify-content:space-between}
+.cardActions{display:flex;align-items:center;gap:9px}
+.qrIcon{
+  width:42px;height:42px;border:1px solid rgba(255,255,255,.26);border-radius:13px;
+  background:rgba(255,255,255,.66);color:#143957;display:grid;place-items:center;
+  font-size:23px;cursor:pointer;backdrop-filter:blur(8px)
+}
+.qrIcon:active{transform:scale(.94)}
+.faq{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  margin-bottom:10px;overflow:hidden
+}
+.faq summary{
+  padding:15px;font-weight:750;cursor:pointer;list-style:none;
+  display:flex;justify-content:space-between;gap:12px
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:20px;color:var(--blue)}
+.faq[open] summary::after{content:"−"}
+.faq p{padding:0 15px 15px;margin:0}
+.infoPanel{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  padding:16px;margin-bottom:12px
+}
+.infoPanel h3{margin:0 0 7px}
+.versionBadge{
+  display:inline-block;padding:6px 10px;border-radius:999px;background:#172c4c;
+  color:#7db0ff;font-size:12px;font-weight:750
+}
+.subscriptionHero{
+  text-align:center;padding:22px 16px;background:linear-gradient(145deg,#172f56,#0c182c);
+  border:1px solid var(--line);border-radius:22px;margin:16px 0
+}
+.subscriptionHero .lock{font-size:46px;margin-bottom:8px}
+.planGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.planCard{
+  background:var(--panel);border:2px solid var(--line);border-radius:18px;
+  padding:16px;cursor:pointer;position:relative
+}
+.planCard.selected{border-color:var(--blue);box-shadow:0 0 0 3px rgba(71,135,255,.15)}
+.planCard h3{margin:0 0 5px}
+.planPrice{font-size:25px;font-weight:850;margin:8px 0}
+.planPrice small{font-size:12px;font-weight:600;color:var(--muted)}
+.trialBadge{
+  display:inline-block;padding:7px 11px;border-radius:999px;background:#153b2a;
+  color:#75e3a6;font-size:12px;font-weight:800
+}
+.ownerPanel{
+  background:var(--panel);border:1px dashed var(--blue);border-radius:18px;
+  padding:16px;margin-top:16px
+}
+.statusRow{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.choiceList{display:grid;gap:10px;margin-top:12px}
+.choiceCard{
+  width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+  color:white;border-radius:16px;padding:14px;cursor:pointer
+}
+.choiceCard b{display:block;margin-bottom:4px}
+.choiceCard small{color:var(--muted)}
+.contactSearch{margin-bottom:10px}
+.statusGood{color:#75e3a6;font-weight:800}
+.statusBad{color:#ff8585;font-weight:800}
+@media(max-width:420px){.planGrid{grid-template-columns:1fr}}
+.securityNote{
+  background:#101925;border:1px solid #24364e;border-radius:15px;padding:13px;margin:12px 0;
+  color:#aebbd0;font-size:13px;line-height:1.4
+}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div class="status"><b>9:41</b><span>▮▮▮ Wi‑Fi 🔋</span></div>
+  <div id="globalTools" class="globalTools hidden">
+    <button class="iconbtn" aria-label="Escanear QR" title="Escanear QR" onclick="go('scan')">⌗</button>
+    <button class="iconbtn" aria-label="Notificaciones" title="Notificaciones" onclick="toast('No hay notificaciones nuevas')">🔔</button>
+  </div>
+
+  <section id="login" class="screen auth active">
+    <div class="logo"><span class="svgIcon" data-icon="wallet"></span></div>
+    <h1 style="text-align:center">BlunarKBank</h1>
+    <p style="text-align:center">Gestiona tus tarjetas, códigos y acciones desde un solo lugar.</p>
+    <label>Correo<input id="loginEmail" type="email" placeholder="correo@ejemplo.com"></label>
+    <label>Contraseña<input id="loginPass" type="password" placeholder="••••••••"></label>
+    <button class="btn" onclick="login()">Iniciar sesión</button>
+    <button class="btn secondary" onclick="demo()">Entrar en modo demo</button>
+    <div style="text-align:center"><button class="link" onclick="show('register')">Crear una cuenta</button></div>
+  </section>
+
+  <section id="register" class="screen auth">
+    <div class="pageHeader"><button class="backBtn" onclick="show('login')" aria-label="Atrás">‹</button><h2>Registro</h2><span class="rightSpace"></span></div>
+    <label>Nombre<input id="regName" placeholder="Tu nombre"></label>
+    <label>Correo<input id="regEmail" type="email" placeholder="correo@ejemplo.com"></label>
+    <label>Contraseña<input id="regPass" type="password" placeholder="Mínimo 6 caracteres"></label>
+    <label>PIN de seguridad<input id="regPin" inputmode="numeric" maxlength="4" placeholder="4 dígitos"></label>
+    <button class="btn" onclick="register()">Crear cuenta</button>
+  </section>
+
+  <section id="home" class="screen">
+    <div class="header"><div><small>Buenos días</small><h1 id="hello">Hola 👋</h1></div><span></span></div>
+    <div class="row">
+      <div class="stat"><small>Tarjetas</small><b id="cardCount">0</b></div>
+      <div class="stat"><small>Acción predeterminada</small><b id="defaultAction" style="font-size:15px">Ninguna</b></div>
+    </div>
+    <h2>Mis tarjetas</h2>
+    <div id="homeCards"></div>
+    <button class="btn secondary" onclick="openCardModal()">Añadir tarjeta</button>
+  </section>
+
+  <section id="cards" class="screen">
+    <div class="header"><h1>Tarjetas</h1><button class="iconbtn" onclick="openCardModal()">＋</button></div>
+    <p>Solo se guarda el número, el alias y la moneda seleccionada.</p>
+    <div id="cardList"></div>
+  </section>
+
+  <section id="actions" class="screen">
+    <h1>Acciones</h1>
+    <p>Aquí aparecen todos los códigos y operaciones disponibles.</p>
+    <div class="item" onclick="chooseAction('Generar QR')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="qr"></span></div><div><b>Generar QR</b><br><small>Crear código desde una tarjeta</small></div></div><span>›</span></div>
+    <div class="item" onclick="go('scan')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="scan"></span></div><div><b>Escanear</b><br><small>QR o número automáticamente</small></div></div><span>›</span></div>
+    <div class="item" onclick="chooseAction('Consultar saldo')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="balance"></span></div><div><b>Consultar saldo</b><br><small>Simulación de operación</small></div></div><span>›</span></div>
+    <div class="item" onclick="chooseAction('Transferencia')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="transfer"></span></div><div><b>Transferencia</b><br><small>Simulación de operación</small></div></div><span>›</span></div>
+    <button class="btn secondary" onclick="openDefaultModal()">Elegir acción predeterminada</button>
+  </section>
+
+  <section id="scan" class="screen">
+    <div class="header"><h1>Escanear</h1><button class="iconbtn" onclick="toggleTorch(this)">🔦</button></div>
+    <p>La cámara detectaría QR y números automáticamente. En esta vista previa puedes simularlo.</p>
+    <div class="scan"><div class="frame"></div><div class="line"></div></div>
+    <button class="btn" onclick="simulateScan()">Simular detección</button>
+  </section>
+
+  <section id="settings" class="screen">
+    <h1>Ajustes</h1>
+    <div class="item" onclick="openDefaultModal()"><div class="left"><div class="ico"><span class="svgIcon" data-icon="bolt"></span></div><div><b>Acción predeterminada</b><br><small id="settingsDefaultAction">Ninguna</small></div></div><span>›</span></div>
+    <div class="item" onclick="go('cards')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="card"></span></div><div><b>Tarjetas</b><br><small>Añadir, revisar o eliminar tarjetas</small></div></div><span>›</span></div>
+    <div class="item"><div class="left"><div class="ico"><span class="svgIcon" data-icon="lock"></span></div><div><b>Face ID</b><br><small>Proteger la app</small></div></div><div class="switch on" onclick="this.classList.toggle('on')"><i></i></div></div>
+    <div class="item" onclick="toast('Moneda principal: USD')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="currency"></span></div><div><b>Moneda principal</b><br><small>USD</small></div></div><span>›</span></div>
+    
+    <div class="item" onclick="go('subscription')">
+      <div class="left">
+        <div class="ico"><span class="svgIcon" data-icon="card"></span></div>
+        <div>
+          <b>Suscripción</b><br>
+          <small id="settingsSubscriptionStatus">Ver plan, pagar o renovar</small>
+        </div>
+      </div>
+      <span>›</span>
+    </div>
+
+    <div class="item" onclick="go('help')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="help"></span></div><div><b>Ayuda</b><br><small>Guía, seguridad y preguntas frecuentes</small></div></div><span>›</span></div>
+    <div class="item" onclick="go('about')"><div class="left"><div class="ico"><span class="svgIcon" data-icon="info"></span></div><div><b>Acerca de</b><br><small>Versión, privacidad y compatibilidad</small></div></div><span>›</span></div>
+    <button class="btn danger" onclick="logout()">Cerrar sesión</button>
+  </section>
+
+  <section id="detail" class="screen">
+    <div class="pageHeader"><button class="backBtn" onclick="go('cards')" aria-label="Atrás">‹</button><h2 id="detailTitle">Tarjeta</h2><span class="rightSpace"></span></div>
+    <div id="detailCard" class="card" style="margin-top:18px"></div>
+    <div class="item"><div><b>Estado</b><br><small>Lista para usar</small></div><span class="badge">Activa</span></div>
+    <button class="btn" onclick="generateQR()">Generar QR</button>
+    <button class="btn secondary" onclick="go('scan')">Escanear</button>
+    <button class="btn danger" onclick="deleteCurrentCard()">Eliminar tarjeta</button>
+  </section>
+
+
+
+  <section id="telephony" class="screen">
+    <div class="header"><h1>Telefonía</h1><span></span></div>
+    <p>Consultas y servicios móviles de Cubacel. Toca directamente la acción que deseas realizar.</p>
+    <div id="telephonyList"></div>
+  </section>
+
+  <section id="bankCodes" class="screen">
+    <div class="pageHeader"><button class="backBtn" onclick="go('home')" aria-label="Atrás">‹</button><h2 id="bankTitle">Banco</h2><span class="rightSpace"></span></div>
+    <p id="bankSubtitle">Toca directamente la acción que deseas realizar.</p>
+    <div id="bankCodeList"></div>
+  </section>
+
+
+
+  <section id="subscription" class="screen subscriptionScreen">
+    <div class="pageHeader">
+      <span class="rightSpace"></span>
+      <h2>Suscripción</h2>
+      <span class="rightSpace"></span>
+    </div>
+
+    <div class="subscriptionHero">
+      <div class="lock"><span class="svgIcon" data-icon="shieldLock" style="width:48px;height:48px"></span></div>
+      <h1 id="subscriptionHeadline">Activa BlunarKBank</h1>
+      <p id="subscriptionMessage">Para continuar usando la aplicación debes elegir una suscripción.</p>
+      <span id="trialBadge" class="trialBadge hidden">7 días gratis</span>
+    </div>
+
+    <div class="infoPanel">
+      <div class="statusRow">
+        <div>
+          <b>Estado</b><br>
+          <small id="subscriptionStatusText">Comprobando…</small>
+        </div>
+        <span id="subscriptionStatusBadge" class="statusBad">Inactiva</span>
+      </div>
+    </div>
+
+    <h2>Elige tu plan</h2>
+    <div class="planGrid">
+      <div id="monthlyPlan" class="planCard selected" onclick="selectPlan('monthly')">
+        <h3>Mensual</h3>
+        <p>Acceso durante 30 días.</p>
+        <div class="planPrice"><span id="monthlyPrice">100</span> CUP <small>/ mes</small></div>
+      </div>
+      <div id="yearlyPlan" class="planCard" onclick="selectPlan('yearly')">
+        <h3>Anual</h3>
+        <p>Acceso durante 365 días.</p>
+        <div class="planPrice"><span id="yearlyPrice">1000</span> CUP <small>/ año</small></div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startSubscriptionPayment()">Pagar suscripción</button>
+    <button id="continueTrialBtn" class="btn secondary hidden" onclick="continueTrial()">Continuar con prueba gratis</button>
+
+    <div class="securityNote">
+      <b>Importante</b><br>
+      Los precios y la activación se obtendrán desde tu servidor. Este prototipo simula la respuesta del servidor y la aprobación del pago.
+    </div>
+  </section>
+
+  <section id="help" class="screen">
+    <div class="pageHeader"><button class="backBtn" onclick="go('settings')" aria-label="Atrás">‹</button><h2>Ayuda</h2><span class="rightSpace"></span></div>
+
+    <div class="infoPanel" style="margin-top:18px">
+      <h3>¿Cómo podemos ayudarte?</h3>
+      <p>Consulta cómo funcionan las tarjetas, el QR, las acciones bancarias y los servicios móviles.</p>
+    </div>
+
+    <h2>Primeros pasos</h2>
+
+    <details class="faq">
+      <summary>¿Cómo añado una tarjeta?</summary>
+      <p>Entra en Ajustes → Tarjetas → Añadir tarjeta. Escribe un alias, el número, la moneda y selecciona el banco correspondiente.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Cómo uso una tarjeta?</summary>
+      <p>Desde Inicio toca la tarjeta. La aplicación abrirá las acciones compatibles con el banco asociado a esa tarjeta.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Cómo edito o elimino una tarjeta?</summary>
+      <p>Entra en Ajustes → Tarjetas y toca la tarjeta. Allí puedes cambiar sus datos o eliminarla.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Cómo genero el QR de una tarjeta?</summary>
+      <p>Toca el icono QR que aparece sobre la tarjeta en Inicio. En la aplicación real se solicitará Face ID antes de mostrar el QR con el número completo.</p>
+    </details>
+
+    <h2>Acciones</h2>
+
+    <details class="faq">
+      <summary>¿Qué hace el botón flotante?</summary>
+      <p>Ejecuta directamente la acción predeterminada. Puedes cambiarla desde Ajustes → Acción predeterminada.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Dónde están las acciones móviles?</summary>
+      <p>En Telefonía encontrarás consultas de saldo, datos, bonos, voz, SMS, compra de planes y otros servicios.</p>
+    </details>
+
+    
+    <details class="faq">
+      <summary>¿Cómo hago una transferencia?</summary>
+      <p>Toca Transferencia, selecciona una de tus tarjetas y su número se copiará al portapapeles. Después se abrirá el USSD para que puedas pegarlo cuando te lo solicite.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Cómo recargo el móvil de un contacto?</summary>
+      <p>Toca Recargar saldo móvil, selecciona el contacto y su número se copiará al portapapeles. Después se abrirá el USSD para que puedas pegarlo cuando lo pida.</p>
+    </details>
+
+<details class="faq">
+      <summary>¿Dónde están las acciones bancarias?</summary>
+      <p>En Banco selecciona BANMET, BPA o BANDEC. También puedes tocar una tarjeta en Inicio para abrir directamente las acciones de su banco.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿Por qué iPhone pide confirmar una acción?</summary>
+      <p>iOS no permite ejecutar llamadas o códigos USSD de forma silenciosa. La app prepara la acción y el sistema solicita confirmación antes de continuar.</p>
+    </details>
+
+    <h2>Seguridad</h2>
+
+    <details class="faq">
+      <summary>¿Dónde se guardan las tarjetas?</summary>
+      <p>En la aplicación final, el número completo se almacenará cifrado en Keychain dentro del iPhone. No se enviará a servidores.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿La app guarda el PIN bancario?</summary>
+      <p>No. La aplicación no debe solicitar ni guardar PIN, contraseña bancaria ni credenciales de autenticación.</p>
+    </details>
+
+    <details class="faq">
+      <summary>¿El QR se envía por Internet?</summary>
+      <p>No. El QR se genera localmente en el dispositivo y desaparece al cerrar su pantalla.</p>
+    </details>
+
+    <button class="btn secondary" onclick="toast('Diagnóstico completado: prototipo funcionando')">Comprobar funcionamiento</button>
+    <button class="btn" onclick="openInfo('Soporte','Para la versión final se añadirá aquí el correo o canal oficial de soporte.')">Contactar soporte</button>
+  </section>
+
+  <section id="about" class="screen">
+    <div class="pageHeader"><button class="backBtn" onclick="go('settings')" aria-label="Atrás">‹</button><h2>Acerca de</h2><span class="rightSpace"></span></div>
+
+    <div class="logo" style="margin-top:22px"><span class="svgIcon" data-icon="wallet"></span></div>
+    <h1 style="text-align:center">BlunarKBank</h1>
+    <p style="text-align:center">Tarjetas, QR, acciones bancarias y servicios móviles en un solo lugar.</p>
+    <div style="text-align:center;margin-bottom:20px"><span class="versionBadge">Versión 1.0</span></div>
+
+    <div class="infoPanel">
+      <h3>Qué hace la aplicación</h3>
+      <p>Permite organizar tarjetas por banco, generar su número en forma de QR, acceder a acciones bancarias y ejecutar consultas o servicios móviles.</p>
+    </div>
+
+    <div class="infoPanel">
+      <h3>Privacidad</h3>
+      <p>El diseño está pensado para guardar los datos sensibles localmente. La aplicación no necesita enviar números de tarjetas a un servidor para generar QR o preparar acciones.</p>
+      <button class="btn secondary" onclick="openInfo('Privacidad','Los números se almacenarán en Keychain, protegidos por Face ID. No se guardarán PIN ni contraseñas bancarias.')">Ver resumen de privacidad</button>
+    </div>
+
+    <div class="infoPanel">
+      <h3>Seguridad</h3>
+      <p>La versión final utilizará Keychain, Face ID, bloqueo automático y ocultación de datos cuando la aplicación pase a segundo plano.</p>
+    </div>
+
+    <div class="infoPanel">
+      <h3>Compatibilidad</h3>
+      <p>Diseñada para iPhone. Las acciones telefónicas requieren una línea móvil activa y confirmación del sistema iOS.</p>
+    </div>
+
+    <div class="infoPanel">
+      <h3>Aviso</h3>
+      <p>BlunarKBank no es una aplicación oficial de BANMET, BPA, BANDEC, ETECSA ni Transfermóvil. Los nombres se utilizan únicamente para identificar servicios seleccionados por el usuario.</p>
+    </div>
+
+    <button class="btn secondary" onclick="toast('BlunarKBank 1.0 · prototipo funcional')">Información de versión</button>
+    <button class="btn secondary" onclick="openInfo('Licencias','En la versión final se mostrarán aquí las licencias de componentes y bibliotecas utilizadas.')">Licencias</button>
+  </section>
+
+  <section id="qrScreen" class="screen">
+    <div class="pageHeader"><button class="backBtn" onclick="go('home')" aria-label="Atrás">‹</button><h2>Código QR</h2><span class="rightSpace"></span></div>
+    <p style="text-align:center;margin-top:22px">Este QR contiene únicamente el número de la tarjeta seleccionada.</p><div class="securityNote">En la app real, el número se leerá desde Keychain después de Face ID y el QR se generará localmente en el iPhone.</div>
+    <div id="qr" class="qr"></div>
+    <p id="qrText" style="text-align:center"></p>
+    <button class="btn" onclick="toast('QR guardado en la galería (simulación)')">Guardar QR</button>
+  </section>
+
+  <nav id="nav" class="nav hidden">
+    <button data-go="home" onclick="go('home')"><span class="svgIcon" data-icon="home"></span>Inicio</button>
+    <button data-go="telephony" onclick="go('telephony')"><span class="svgIcon" data-icon="phone"></span>Telefonía</button>
+    <button data-go="bankCodes" onclick="openBankModal()"><span class="svgIcon" data-icon="bank"></span>Banco</button>
+    <button data-go="settings" onclick="go('settings')"><span class="svgIcon" data-icon="settings"></span>Ajustes</button>
+  </nav>
+  <button id="floatingAction" class="floatingAction hidden" onclick="runDefaultAction()" aria-label="Ejecutar acción predeterminada" title="Ejecutar acción predeterminada">
+    <span class="svgIcon" data-icon="bolt"></span><small id="floatingActionLabel">Saldo</small>
+  </button>
+
+  <div id="toast" class="toast"></div>
+
+
+  <div id="editCardModal" class="modal">
+    <div class="sheet">
+      <h2 style="margin-top:0">Editar tarjeta</h2>
+      <input id="editCardId" type="hidden">
+      <label>Alias<input id="editCardAlias" placeholder="Ej. Principal"></label>
+      <label>Número<input id="editCardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456"></label>
+      <label>Moneda<select id="editCardCurrency">
+        <option>USD</option><option>EUR</option><option>CUP</option><option>MLC</option><option>Otra</option>
+      </select></label>
+      <label>Banco<select id="editCardBank">
+        <option value="BANMET">Banco Metropolitano (BANMET)</option>
+        <option value="BPA">Banco Popular de Ahorro (BPA)</option>
+        <option value="BANDEC">Banco de Crédito y Comercio (BANDEC)</option>
+      </select></label>
+      <button class="btn" onclick="saveEditedCard()">Guardar cambios</button>
+      <button class="btn danger" onclick="deleteEditedCard()">Eliminar tarjeta</button>
+      <button class="btn secondary" onclick="closeModal('editCardModal')">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="cardModal" class="modal">
+    <div class="sheet">
+      <h2 style="margin-top:0">Añadir tarjeta</h2>
+      <label>Alias<input id="cardAlias" placeholder="Ej. Principal"></label>
+      <label>Número<input id="cardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456"></label>
+      <label>Moneda<select id="cardCurrency"><option>USD</option><option>EUR</option><option>CUP</option><option>MLC</option><option>Otra</option></select></label>
+      <label>Banco<select id="cardBank">
+        <option value="BANMET">Banco Metropolitano (BANMET)</option>
+        <option value="BPA">Banco Popular de Ahorro (BPA)</option>
+        <option value="BANDEC">Banco de Crédito y Comercio (BANDEC)</option>
+      </select></label>
+      <button class="btn" onclick="saveCard()">Guardar tarjeta</button>
+      <button class="btn secondary" onclick="closeModal('cardModal')">Cancelar</button>
+    </div>
+  </div>
+
+
+  <div id="bankModal" class="modal">
+    <div class="sheet">
+      <h2 style="margin-top:0">Selecciona tu banco</h2>
+      <p>Los códigos de autenticación, registro y eliminación cambian según el banco.</p>
+      <div class="item" onclick="selectBank('BANMET')">
+        <div class="left"><div class="ico"><span class="svgIcon" data-icon="bank"></span></div><div><b>Banco Metropolitano</b><br><small>BANMET</small></div></div><span>›</span>
+      </div>
+      <div class="item" onclick="selectBank('BPA')">
+        <div class="left"><div class="ico"><span class="svgIcon" data-icon="bank"></span></div><div><b>Banco Popular de Ahorro</b><br><small>BPA</small></div></div><span>›</span>
+      </div>
+      <div class="item" onclick="selectBank('BANDEC')">
+        <div class="left"><div class="ico"><span class="svgIcon" data-icon="bank"></span></div><div><b>Banco de Crédito y Comercio</b><br><small>BANDEC</small></div></div><span>›</span>
+      </div>
+      <button class="btn secondary" onclick="closeModal('bankModal')">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="defaultModal" class="modal">
+    <div class="sheet">
+      <h2 style="margin-top:0">Acción predeterminada</h2>
+      <p>El botón flotante ejecutará esta acción.</p>
+      <div class="item" onclick="setDefault('Consultar saldo móvil')">Consultar saldo móvil <span>›</span></div>
+      <div class="item" onclick="setDefault('Comprar datos')">Comprar datos <span>›</span></div>
+      <div class="item" onclick="setDefault('Escanear QR')">Escanear QR <span>›</span></div>
+      <div class="item" onclick="setDefault('Banco')">Abrir Banco <span>›</span></div>
+      <button class="btn secondary" onclick="closeModal('defaultModal')">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="infoModal" class="modal">
+    <div class="sheet">
+      <h2 id="infoTitle" style="margin-top:0"></h2>
+      <p id="infoText"></p>
+      <button class="btn" onclick="closeModal('infoModal')">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const ICONS={
+  home:'<path d="M3 10.8 12 3l9 7.8"/><path d="M5 9.8V21h14V9.8"/><path d="M9 21v-7h6v7"/>',
+  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  bank:'<path d="m3 9 9-5 9 5"/><path d="M5 10h14"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/><path d="M3 20h18"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1V21h-4v-.08a1.7 1.7 0 0 0-1.1-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1-.4H3v-4h.08a1.7 1.7 0 0 0 1.56-1.1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1V3h4v.08a1.7 1.7 0 0 0 1.1 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.13.37.34.7.6 1 .27.25.62.39 1 .4H21v4h-.08a1.7 1.7 0 0 0-1.52.6Z"/>',
+  wallet:'<path d="M4 6.5h14a2 2 0 0 1 2 2V19H4a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2h12"/><path d="M16 11h5v4h-5a2 2 0 0 1 0-4Z"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/>',
+  qr:'<rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><path d="M15 15h2v2h-2zM19 15h2v6h-2M15 19h2v2h-2"/>',
+  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/>',
+  balance:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-.7-1.7-1-3-1-1.7 0-3 .8-3 2s1 1.8 3 2.2 3 1 3 2.3-1.3 2.2-3 2.2c-1.3 0-2.5-.4-3.3-1.2M12 5.5v13"/>',
+  transfer:'<path d="M7 7h12"/><path d="m15 3 4 4-4 4"/><path d="M17 17H5"/><path d="m9 13-4 4 4 4"/>',
+  bolt:'<path d="m13 2-8 12h7l-1 8 8-12h-7z"/>',
+  lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+  shieldLock:'<path d="M12 2 4 5v6c0 5 3.4 9.5 8 11 4.6-1.5 8-6 8-11V5z"/><rect x="9" y="10" width="6" height="5" rx="1"/><path d="M10.5 10V8.8a1.5 1.5 0 0 1 3 0V10"/>',
+  currency:'<circle cx="12" cy="12" r="9"/><path d="M12 6v12M15 8H10.5a2.5 2.5 0 0 0 0 5H13a2.5 2.5 0 0 1 0 5H8.5"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.5 2.5 0 1 1 4.1 1.9c-1 .8-1.8 1.2-1.8 2.6"/><path d="M12 17h.01"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7h.01"/>',
+  sim:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v5h6V3"/><path d="M9 13h.01M12 13h.01M15 13h.01M9 16h.01M12 16h.01M15 16h.01"/>',
+  data:'<path d="M4 17h2M8 14h2M12 11h2M16 8h2M20 5h1"/><path d="M4 20h17"/>',
+  voice:'<path d="M6 10v4M10 7v10M14 5v14M18 8v8"/>',
+  message:'<path d="M4 5h16v12H8l-4 4z"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  cart:'<circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M3 4h2l2.5 11h11l2-7H7"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/>',
+  receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  droplet:'<path d="M12 2s6 6.5 6 12a6 6 0 0 1-12 0c0-5.5 6-12 6-12z"/>',
+  flame:'<path d="M12 22c4 0 7-3 7-7 0-3-2-5-4-7 0 3-2 4-3 5 0-4-2-7-5-10 0 5-2 7-2 11 0 5 3 8 7 8z"/>',
+  power:'<path d="M12 2v10"/><path d="M6.3 5.7a8 8 0 1 0 11.4 0"/>',
+  contact:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l3 3"/>',
+  history:'<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/><path d="M12 7v5l3 2"/>',
+  file:'<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 13h6M9 17h6"/>',
+  wifi:'<path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 20h.01"/>'
+};
+
+function icon(name){
+  return '<span class="svgIcon"><svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[name]||ICONS.info)+'</svg></span>';
+}
+function hydrateIcons(root=document){
+  root.querySelectorAll('[data-icon]').forEach(el=>{
+    const name=el.getAttribute('data-icon');
+    el.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[name]||ICONS.info)+'</svg>';
+  });
+}
+function iconForAction(name){
+  const n=String(name).toLowerCase();
+  if(n.includes('transfer'))return 'transfer';
+  if(n.includes('saldo')||n.includes('cuenta')||n.includes('crédito'))return 'balance';
+  if(n.includes('dato')||n.includes('3g')||n.includes('4g')||n.includes('nauta'))return 'data';
+  if(n.includes('voz')||n.includes('llamada')||n.includes('buzón'))return 'voice';
+  if(n.includes('sms')||n.includes('mensaje'))return 'message';
+  if(n.includes('amigo')||n.includes('contacto'))return 'users';
+  if(n.includes('comprar')||n.includes('plan'))return 'cart';
+  if(n.includes('recarga')||n.includes('recargar'))return 'phone';
+  if(n.includes('electricidad'))return 'bolt';
+  if(n.includes('agua'))return 'droplet';
+  if(n.includes('gas'))return 'flame';
+  if(n.includes('pin')||n.includes('autent')||n.includes('registr'))return 'key';
+  if(n.includes('últim')||n.includes('localizar'))return 'history';
+  if(n.includes('pagar')||n.includes('onat')||n.includes('giro'))return 'receipt';
+  if(n.includes('desconectar'))return 'power';
+  if(n.includes('servicio'))return 'settings';
+  if(n.includes('tarjeta'))return 'card';
+  return 'bank';
+}
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+let currentCard=null;
+
+function state(){
+  return JSON.parse(localStorage.getItem('cc_state')||'{"user":null,"cards":[],"defaultAction":"Consultar saldo móvil","subscription":{"firstAccess":null,"activeUntil":null,"plan":null,"monthlyPrice":100,"yearlyPrice":1000}}');
+}
+function save(s){localStorage.setItem('cc_state',JSON.stringify(s))}
+function show(id){
+  $$('.screen').forEach(x=>x.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  const logged=!['login','register'].includes(id);
+  $('#nav').classList.toggle('hidden',!logged);
+  $('#globalTools').classList.toggle('hidden',!logged);
+  $('#floatingAction').classList.toggle('hidden',!logged);
+}
+function go(id){
+  if(!enforceSubscription(id))return;
+  show(id);
+  render();
+  if(id==='subscription')renderSubscription();
+
+  const settingsSub=$('#settingsSubscriptionStatus');
+  if(settingsSub){
+    const info=subscriptionInfo();
+    if(info.paid){
+      settingsSub.textContent='Activa hasta '+new Date(info.sub.activeUntil).toLocaleDateString();
+    }else if(info.trial){
+      settingsSub.textContent='Prueba gratis: '+daysRemaining(info.trialEnds)+' días restantes';
+    }else{
+      settingsSub.textContent='Suscripción vencida · Toca para pagar';
+    }
+  }
+
+}
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.style.display='block';
+  clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',1800);
+}
+function login(){
+  const email=$('#loginEmail').value.trim(),pass=$('#loginPass').value;
+  if(!email||!pass)return toast('Completa correo y contraseña');
+  let s=state();s.user={name:email.split('@')[0],email};save(s);enter();
+}
+function demo(){
+  let s=state();
+  s.user={name:'Jorge',email:'demo@cardcontrol.app'};
+  if(!s.cards.length)s.cards=[
+    {id:Date.now(),alias:'Principal',number:'4587123412344587',currency:'USD',bank:'BANMET'},
+    {id:Date.now()+1,alias:'Viajes',number:'9012456789019012',currency:'EUR',bank:'BPA'}
+  ];
+  save(s);enter();
+}
+function register(){
+  const name=$('#regName').value.trim(),email=$('#regEmail').value.trim(),pass=$('#regPass').value,pin=$('#regPin').value;
+  if(!name||!email||pass.length<6||pin.length!==4)return toast('Revisa todos los datos');
+  let s=state();s.user={name,email};save(s);toast('Cuenta creada');setTimeout(enter,500);
+}
+function enter(){render();go('home')}
+function logout(){let s=state();s.user=null;save(s);show('login')}
+
+let selectedSubscriptionPlan='monthly';
+
+const SUBSCRIPTION_API_URL='https://tu-servidor.com/api/subscription';
+
+async function loadSubscriptionPricesFromServer(){
+  /*
+    En la app real:
+    const response=await fetch(SUBSCRIPTION_API_URL+'/plans');
+    const plans=await response.json();
+    monthlyPrice=plans.monthly.price;
+    yearlyPrice=plans.yearly.price;
+  */
+  const s=state();
+  if(!s.subscription)s.subscription={};
+  // Valores simulados de la respuesta del servidor para este prototipo.
+  s.subscription.monthlyPrice=100;
+  s.subscription.yearlyPrice=1000;
+  save(s);
+  return s.subscription;
+}
+
+
+function ensureSubscriptionState(){
+  const s=state();
+  if(!s.subscription)s.subscription={};
+  const sub=s.subscription;
+  if(!sub.firstAccess)sub.firstAccess=new Date().toISOString();
+  if(!sub.monthlyPrice)sub.monthlyPrice=100;
+  if(!sub.yearlyPrice)sub.yearlyPrice=1000; // valores temporales hasta consultar el servidor
+  if(!('activeUntil' in sub))sub.activeUntil=null;
+  if(!('plan' in sub))sub.plan=null;
+  save(s);
+  return sub;
+}
+
+function subscriptionInfo(){
+  const sub=ensureSubscriptionState();
+  const now=Date.now();
+  const first=new Date(sub.firstAccess).getTime();
+  const trialEnds=first+(7*24*60*60*1000);
+  const paidUntil=sub.activeUntil?new Date(sub.activeUntil).getTime():0;
+  const paid=paidUntil>now;
+  const trial=!paid && now<trialEnds;
+  const allowed=paid||trial;
+  return {sub,now,trialEnds,paidUntil,paid,trial,allowed};
+}
+
+function daysRemaining(ms){
+  return Math.max(0,Math.ceil((ms-Date.now())/(24*60*60*1000)));
+}
+
+function enforceSubscription(target){
+  if(target==='login'||target==='register'||target==='subscription')return true;
+  const info=subscriptionInfo();
+  if(!info.allowed){
+    show('subscription');
+    renderSubscription();
+    return false;
+  }
+  return true;
+}
+
+async function renderSubscription(){
+  await loadSubscriptionPricesFromServer();
+  const info=subscriptionInfo();
+  const sub=info.sub;
+  const mp=$('#monthlyPrice'),yp=$('#yearlyPrice');
+  if(mp)mp.textContent=sub.monthlyPrice;
+  if(yp)yp.textContent=sub.yearlyPrice;
+
+  const status=$('#subscriptionStatusText');
+  const badge=$('#subscriptionStatusBadge');
+  const headline=$('#subscriptionHeadline');
+  const message=$('#subscriptionMessage');
+  const trialBadge=$('#trialBadge');
+  const continueBtn=$('#continueTrialBtn');
+
+  if(info.paid){
+    if(status)status.textContent='Activa hasta '+new Date(sub.activeUntil).toLocaleDateString();
+    if(badge){badge.textContent='Activa';badge.className='statusGood'}
+    if(headline)headline.textContent='Suscripción activa';
+    if(message)message.textContent='Puedes renovar o cambiar de plan cuando lo necesites.';
+    trialBadge?.classList.add('hidden');
+    continueBtn?.classList.add('hidden');
+  }else if(info.trial){
+    const days=daysRemaining(info.trialEnds);
+    if(status)status.textContent='Prueba gratis: '+days+' día'+(days===1?'':'s')+' restante'+(days===1?'':'s');
+    if(badge){badge.textContent='Prueba';badge.className='statusGood'}
+    if(headline)headline.textContent='Disfruta tu prueba gratis';
+    if(message)message.textContent='Al terminar los 7 días deberás suscribirte para seguir usando la aplicación.';
+    if(trialBadge){trialBadge.textContent=days+' días gratis restantes';trialBadge.classList.remove('hidden')}
+    continueBtn?.classList.remove('hidden');
+  }else{
+    if(status)status.textContent='La prueba gratis terminó';
+    if(badge){badge.textContent='Bloqueada';badge.className='statusBad'}
+    if(headline)headline.textContent='Debes suscribirte';
+    if(message)message.textContent='Tu acceso está bloqueado hasta que actives un plan mensual o anual.';
+    trialBadge?.classList.add('hidden');
+    continueBtn?.classList.add('hidden');
+  }
+}
+
+function selectPlan(plan){
+  selectedSubscriptionPlan=plan;
+  $('#monthlyPlan')?.classList.toggle('selected',plan==='monthly');
+  $('#yearlyPlan')?.classList.toggle('selected',plan==='yearly');
+}
+
+function startSubscriptionPayment(){
+  const info=subscriptionInfo();
+  const price=selectedSubscriptionPlan==='monthly'?info.sub.monthlyPrice:info.sub.yearlyPrice;
+  const label=selectedSubscriptionPlan==='monthly'?'mensual':'anual';
+  if(confirm('Plan '+label+': '+price+' CUP. ¿Simular pago aprobado?')){
+    activateSubscription(selectedSubscriptionPlan);
+  }
+}
+
+function activateSubscription(plan){
+  const s=state();
+  const sub=ensureSubscriptionState();
+  const start=Math.max(Date.now(),sub.activeUntil?new Date(sub.activeUntil).getTime():0);
+  const duration=plan==='yearly'?365:30;
+  sub.activeUntil=new Date(start+duration*24*60*60*1000).toISOString();
+  sub.plan=plan;
+  s.subscription=sub;
+  save(s);
+  closeModal();
+  toast('Suscripción activada');
+  renderSubscription();
+  if(subscriptionInfo().allowed){go('home');}else{show('subscription');renderSubscription();}
+}
+
+function continueTrial(){
+  const info=subscriptionInfo();
+  if(info.trial)if(subscriptionInfo().allowed){go('home');}else{show('subscription');renderSubscription();}
+  else renderSubscription();
+}
+
+
+
+function render(){
+  setTimeout(()=>hydrateIcons(),0);
+  const s=state();
+  ensureSubscriptionState();
+  if(!s.defaultAction || s.defaultAction==='Ninguna'){
+    s.defaultAction='Consultar saldo móvil';
+    save(s);
+  }
+  let changed=false;
+  s.cards.forEach(c=>{if(!c.bank){c.bank='BANMET';changed=true}});
+  if(changed)save(s);
+  $('#hello').textContent='Hola, '+(s.user?.name||'Usuario')+' 👋';
+  $('#cardCount').textContent=s.cards.length;
+  $('#defaultAction').textContent=s.defaultAction||'Ninguna';
+  const sd=$('#settingsDefaultAction');if(sd)sd.textContent=s.defaultAction;
+  const fl=$('#floatingActionLabel');
+  if(fl){
+    fl.textContent={
+      'Consultar saldo móvil':'Saldo',
+      'Comprar datos':'Datos',
+      'Escanear QR':'Escanear',
+      'Banco':'Banco'
+    }[s.defaultAction]||'Saldo';
+  }
+  renderTelephony();
+  renderSubscription();
+  const cards=s.cards.map((c,i)=>cardHTML(c,i)).join('');
+  $('#homeCards').innerHTML=cards||'<p>No tienes tarjetas guardadas.</p>';
+  $('#cardList').innerHTML=s.cards.map(c=>`
+    <div class="item" onclick="editCard(${c.id})">
+      <div class="left"><div class="ico"><span class="svgIcon" data-icon="card"></span></div><div><b>${esc(c.alias)}</b><br><small>${esc(c.currency)} · •••• ${last4(c.number)}</small></div></div>
+      <span>Editar ›</span>
+    </div>`).join('')||'<p>No tienes tarjetas guardadas.</p>';
+}
+function bankName(key){
+  return ({BANMET:'Banco Metropolitano',BPA:'Banco Popular de Ahorro',BANDEC:'Banco de Crédito y Comercio'})[key]||key;
+}
+function cardHTML(c,i){return `
+  <div class="card bank-${esc(c.bank||'BANMET')}" onclick="openCard(${c.id})">
+    <div class="cardWatermark">◉</div>
+    <div class="cardTop">
+      <span></span>
+      <div class="cardActions">
+        <button class="qrIcon" aria-label="Mostrar número como QR" title="Mostrar número como QR"
+          onclick="event.stopPropagation();requestCardQR(${c.id})">▦</button>
+      </div>
+    </div>
+    <div>
+      <div class="cardChip"></div>
+      <div style="letter-spacing:3px;font-size:22px">•••• ${last4(c.number)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-top:8px">
+        <small style="color:inherit;font-weight:700">${esc(c.alias)}</small>
+        <div style="display:flex;align-items:center;gap:8px">
+          <b>${esc(c.currency)}</b>
+          <span style="font-size:9px;font-weight:900;padding:4px 6px;border-radius:5px;background:#fff;color:#d71920;border:1px solid rgba(0,0,0,.15)">red</span>
+        </div>
+      </div>
+    </div>
+  </div>`}
+function esc(t){return String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function last4(n){return String(n).replace(/\D/g,'').slice(-4).padStart(4,'0')}
+function openCardModal(){$('#cardModal').classList.add('open')}
+function closeModal(id){$('#'+id).classList.remove('open')}
+function saveCard(){
+  const alias=$('#cardAlias').value.trim()||'Sin nombre';
+  const number=$('#cardNumber').value.replace(/\D/g,'');
+  const currency=$('#cardCurrency').value;
+  const bank=$('#cardBank').value;
+  if(number.length<4)return toast('Escribe al menos 4 dígitos');
+  let s=state();s.cards.push({id:Date.now(),alias,number,currency,bank});save(s);
+  $('#cardAlias').value='';$('#cardNumber').value='';closeModal('cardModal');render();toast('Tarjeta guardada');
+}
+
+function editCard(id){
+  const c=state().cards.find(x=>x.id===id);
+  if(!c)return toast('Tarjeta no encontrada');
+  $('#editCardId').value=String(c.id);
+  $('#editCardAlias').value=c.alias||'';
+  $('#editCardNumber').value=c.number||'';
+  $('#editCardCurrency').value=c.currency||'USD';
+  $('#editCardBank').value=c.bank||'BANMET';
+  $('#editCardModal').classList.add('open');
+}
+
+function saveEditedCard(){
+  const id=Number($('#editCardId').value);
+  const alias=$('#editCardAlias').value.trim()||'Sin nombre';
+  const number=$('#editCardNumber').value.replace(/\D/g,'');
+  const currency=$('#editCardCurrency').value;
+  const bank=$('#editCardBank').value;
+  if(number.length<4)return toast('Escribe al menos 4 dígitos');
+  let s=state();
+  const c=s.cards.find(x=>x.id===id);
+  if(!c)return toast('Tarjeta no encontrada');
+  c.alias=alias;c.number=number;c.currency=currency;c.bank=bank;
+  save(s);closeModal('editCardModal');render();toast('Tarjeta actualizada');
+}
+
+function deleteEditedCard(){
+  const id=Number($('#editCardId').value);
+  let s=state();
+  s.cards=s.cards.filter(x=>x.id!==id);
+  save(s);closeModal('editCardModal');render();toast('Tarjeta eliminada');
+}
+
+function openCard(id){
+  const c=state().cards.find(x=>x.id===id);if(!c)return;
+  currentCard=id;
+  selectBank(c.bank||'BANMET', c);
+}
+function deleteCurrentCard(){
+  if(!currentCard)return;
+  let s=state();s.cards=s.cards.filter(x=>x.id!==currentCard);save(s);currentCard=null;toast('Tarjeta eliminada');setTimeout(()=>go('cards'),500);
+}
+
+function requestCardQR(id){
+  const c=state().cards.find(x=>x.id===id);
+  if(!c)return toast('Tarjeta no encontrada');
+  currentCard=id;
+  toast('Face ID aprobado (simulación)');
+  setTimeout(()=>generateQR(),450);
+}
+
+function generateQR(){
+  const c=state().cards.find(x=>x.id===currentCard);if(!c)return toast('Selecciona una tarjeta');
+  $('#qrText').innerHTML='<b>'+esc(c.alias)+'</b><br>'+esc(c.currency)+' •••• '+last4(c.number)+'<br><small>El QR codifica el número completo</small>';
+  const q=$('#qr');q.innerHTML='';
+  let seed=[...String(c.number+c.currency)].reduce((a,ch)=>a+ch.charCodeAt(0),0);
+  for(let y=0;y<21;y++)for(let x=0;x<21;x++){
+    const i=document.createElement('i');
+    const finder=(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);
+    seed=(seed*9301+49297)%233280;
+    if(finder||seed/233280>.52)i.className='on';
+    q.appendChild(i);
+  }
+  go('qrScreen');
+}
+function simulateScan(){toast('Detectado: QR de tarjeta USD •••• 4587')}
+function toggleTorch(btn){btn.textContent=btn.textContent==='🔦'?'💡':'🔦';toast(btn.textContent==='💡'?'Linterna activada':'Linterna apagada')}
+
+
+const telephonyCodes = [
+  ['Consultar saldo principal', '*222#', 'Saldo principal y recursos activos'],
+  ['Consultar saldo postpago', '*111#', 'Líneas postpago o institucionales'],
+  ['Consultar datos móviles', '*222*328#', 'MB disponibles y fecha de vencimiento'],
+  ['Consultar bonos y planes USD', '*222*266#', 'Bonos promocionales y planes en USD'],
+  ['Consultar estado de recarga', '*222*732#', 'Estado de recargas internacionales'],
+  ['Consultar plan de voz', '*222*869#', 'Minutos disponibles'],
+  ['Consultar plan de SMS', '*222*767#', 'Mensajes disponibles'],
+  ['Consultar Plan Amigos', '*222*264#', 'Estado del Plan Amigos'],
+  ['Comprar planes y servicios', '*133#', 'Datos, voz, SMS y Plan Amigos'],
+  ['Transferir saldo', '*234#', 'Transferencia y cambio de clave'],
+  ['Adelanta Saldo', '*234#', 'Solicitar adelanto de saldo'],
+  ['Recargar con tarjeta física', '*662*NUMERO_DE_TARJETA#', 'Introduce el número del cupón'],
+  ['Recargar mediante llamada', '*666', 'Menú hablado para introducir el cupón'],
+  ['Comprobar compatibilidad 3G/4G', '*222*468#', 'Compatibilidad del teléfono con datos móviles'],
+  ['Buzón de voz', '*123', 'Escuchar y administrar mensajes de voz'],
+  ['Llamada por cobrar', '*99NUMERO#', 'Paga quien recibe la llamada'],
+  ['Llamada con número oculto', '#31#NUMERO', 'Oculta tu número para esa llamada'],
+  ['Atención al cliente', '2266', 'Consultas y asistencia de ETECSA']
+];
+
+function renderTelephony(){
+  const box=$('#telephonyList');
+  if(!box)return;
+  box.innerHTML=telephonyCodes.map(([name,code,description])=>`
+    <div class="item" role="button" tabindex="0"
+      onclick="dialCode('${code}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();dialCode('${code}')}">
+      <div class="left">
+        <div class="ico">${icon(iconForAction(name))}</div>
+        <div><b>${esc(name)}</b><br><small>${esc(description)}</small></div>
+      </div>
+      <span>›</span>
+    </div>`).join('');
+}
+
+function runDefaultAction(){
+  const action=state().defaultAction||'Consultar saldo móvil';
+  if(action==='Consultar saldo móvil')return dialCode('*222#');
+  if(action==='Comprar datos')return dialCode('*133#');
+  if(action==='Escanear QR')return go('scan');
+  if(action==='Banco')return openBankModal();
+  return dialCode('*222#');
+}
+
+const bankData = {
+  BANMET: {
+    name: 'Banco Metropolitano',
+    short: 'BANMET',
+    specific: [
+      ['Autenticarse', '*444*40*03#'],
+      ['Registrarse', '*444*49*03*NUMERO_DE_TARJETA#'],
+      ['Eliminar registro', '*444*68*03#']
+    ]
+  },
+  BPA: {
+    name: 'Banco Popular de Ahorro',
+    short: 'BPA',
+    specific: [
+      ['Autenticarse', '*444*40*01#'],
+      ['Registrarse', '*444*49*01*NUMERO_DE_TARJETA#'],
+      ['Eliminar registro', '*444*68*01#']
+    ]
+  },
+  BANDEC: {
+    name: 'Banco de Crédito y Comercio',
+    short: 'BANDEC',
+    specific: [
+      ['Autenticarse', '*444*40*02#'],
+      ['Registrarse', '*444*49*02*NUMERO_DE_TARJETA#'],
+      ['Eliminar registro', '*444*68*02#']
+    ]
+  }
+};
+
+const commonCodes = [
+  ['Desconectarse', '*444*70#'],
+  ['Consultar saldo', '*444*46#'],
+  ['Consultar servicios', '*444*47#'],
+  ['Últimas operaciones', '*444*48#'],
+  ['Consultar todas las cuentas', '*444*58#'],
+  ['Consultar límites', '*444*62#'],
+  ['Últimos pagos realizados', '*444*63#'],
+  ['Consultar ONAT', '*444*56*RC05#'],
+  ['Consultar giro postal', '*444*65#'],
+  ['Consultar créditos', '*444*72#'],
+  ['Transferencia', '__TRANSFER__'],
+  ['Pagar electricidad', '*444*41#'],
+  ['Pagar teléfono', '*444*42#'],
+  ['Pagar ONAT', '*444*43#'],
+  ['Pagar agua', '*444*51#'],
+  ['Servicios contratados', '*444*52#'],
+  ['Pagar gas', '*444*67#'],
+  ['Recargar saldo móvil', '__MOBILE_RECHARGE__'],
+  ['Recargar Nauta', '*444*59#'],
+  ['Amortizar crédito', '*444*55#'],
+  ['Enviar giro postal', '*444*64#'],
+  ['Asociar otra tarjeta', '*444*60#'],
+  ['Cambiar PIN', '*444*69#'],
+  ['Cambiar límites', '*444*61#'],
+  ['Localizar transferencia', '*444*73#'],
+  ['Reimprimir tarjeta', '*444*74#'],
+  ['Cambiar PIN multibanca', '*444*75#'],
+  ['Imprimir tarjeta USD', '*444*76#'],
+  ['Recarga propia', '*444*77#'],
+  ['PIN digital', '*444*79#']
+];
+
+function openBankModal(){
+  $('#bankModal').classList.add('open');
+}
+
+function selectBank(key, selectedCard=null){
+  const bank = bankData[key];
+  if(!bank) return;
+  closeModal('bankModal');
+  const card = selectedCard || state().cards.find(x=>x.id===currentCard) || null;
+  $('#bankTitle').textContent = card ? card.alias : bank.name;
+  $('#bankSubtitle').textContent = card
+    ? bank.name+' · '+card.currency+' •••• '+last4(card.number)
+    : bank.short+' — selecciona una acción.';
+  const specificCodes = bank.specific.map(([name, code]) => {
+    const readyCode = card ? code.replace('NUMERO_DE_TARJETA', card.number) : code;
+    return codeRow(name, readyCode);
+  });
+  const rows = [
+    '<div class="securityNote">Códigos de '+esc(bank.name)+(card?' para la tarjeta seleccionada.':'')+'</div>',
+    '<h2>Códigos propios del banco</h2>',
+    ...specificCodes,
+    '<h2>Códigos comunes</h2>',
+    ...commonCodes.map(([name, code]) => codeRow(name, code))
+  ];
+  $('#bankCodeList').innerHTML = rows.join('');
+  go('bankCodes');
+}
+
+function codeRow(name, code){
+  const action=code==='__TRANSFER__'?'openTransferCardPicker()':
+    code==='__MOBILE_RECHARGE__'?'openContactPickerForRecharge()':
+    `dialCode('${code.replace(/'/g, "\'")}')`;
+  return `
+    <div class="item" role="button" tabindex="0"
+      onclick="${action}"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${action}}">
+      <div class="left">
+        <div class="ico"><span class="svgIcon" data-icon="bank"></span></div>
+        <div><b>${esc(name)}</b></div>
+      </div>
+      <span>›</span>
+    </div>`;
+}
+
+
+
+
+async function copyText(value,label='Dato'){
+  try{
+    await navigator.clipboard.writeText(value);
+    toast(label+' copiado al portapapeles');
+    return true;
+  }catch(e){
+    const area=document.createElement('textarea');
+    area.value=value;
+    area.style.position='fixed';
+    area.style.opacity='0';
+    document.body.appendChild(area);
+    area.select();
+    const ok=document.execCommand('copy');
+    area.remove();
+    toast(ok?label+' copiado al portapapeles':'No se pudo copiar');
+    return ok;
+  }
+}
+
+function openTransferCardPicker(){
+  const cards=state().cards||[];
+  if(!cards.length){
+    openInfo('Transferencia','Primero debes añadir al menos una tarjeta en Ajustes → Tarjetas.');
+    return;
+  }
+  const list=cards.map((c,i)=>`
+    <button class="choiceCard" onclick="selectTransferCard(${i})">
+      <b>${esc(c.alias||'Tarjeta')}</b>
+      <small>${esc(c.currency||'CUP')} · •••• ${last4(c.number)}</small>
+    </button>`).join('');
+  openInfo(
+    'Selecciona una tarjeta',
+    'Toca la tarjeta que deseas usar. Su número se copiará al portapapeles y luego se abrirá la transferencia.',
+    '<div class="choiceList">'+list+'</div>'
+  );
+}
+
+async function selectTransferCard(index){
+  const card=(state().cards||[])[index];
+  if(!card)return;
+  await copyText(String(card.number||'').replace(/\s/g,''),'Número de tarjeta');
+  closeModal();
+  setTimeout(()=>dialCode('*444*45#'),250);
+}
+
+const demoContacts=[
+  {name:'Contacto de ejemplo',phone:'5355555555'},
+  {name:'Casa',phone:'5351111111'},
+  {name:'Trabajo',phone:'5352222222'}
+];
+
+async function openContactPickerForRecharge(){
+  if('contacts' in navigator && 'ContactsManager' in window){
+    try{
+      const contacts=await navigator.contacts.select(['name','tel'],{multiple:false});
+      if(contacts && contacts.length){
+        const contact=contacts[0];
+        const phone=((contact.tel&&contact.tel[0])||'').replace(/[^\d+]/g,'');
+        if(phone){
+          await finishRechargeContact(phone,Array.isArray(contact.name)?contact.name[0]:contact.name||'Contacto');
+          return;
+        }
+      }
+    }catch(e){}
+  }
+  showContactFallback();
+}
+
+function showContactFallback(){
+  const list=demoContacts.map((c,i)=>`
+    <button class="choiceCard" onclick="selectDemoContact(${i})">
+      <b>${esc(c.name)}</b>
+      <small>${esc(c.phone)}</small>
+    </button>`).join('');
+  openInfo(
+    'Selecciona un contacto',
+    'El navegador no permite leer la agenda directamente. En la app iOS se solicitará permiso para acceder a Contactos.',
+    '<div class="choiceList">'+list+'</div>'+
+    '<button class="btn secondary" onclick="enterPhoneManually()">Escribir número manualmente</button>'
+  );
+}
+
+function selectDemoContact(index){
+  const contact=demoContacts[index];
+  if(contact)finishRechargeContact(contact.phone,contact.name);
+}
+
+function enterPhoneManually(){
+  const value=prompt('Introduce el número de teléfono:');
+  if(value)finishRechargeContact(value,'Número');
+}
+
+async function finishRechargeContact(phone,name){
+  const clean=String(phone).replace(/[^\d+]/g,'');
+  await copyText(clean,'Número de '+name);
+  closeModal();
+  setTimeout(()=>dialCode('*444*54#'),250);
+}
+
+function dialCode(code){
+  if(code.includes('NUMERO_DE_TARJETA')){
+    const value=prompt('Introduce el número de la tarjeta o cupón:');
+    if(!value)return;
+    code=code.replace('NUMERO_DE_TARJETA',value.replace(/\D/g,''));
+  }
+  if(code.includes('NUMERO')){
+    const value=prompt('Introduce el número de teléfono:');
+    if(!value)return;
+    code=code.replace('NUMERO',value.replace(/\D/g,''));
+  }
+  location.href='tel:'+code.replace(/#/g,'%23');
+}
+
+
+function chooseAction(a){toast(a+' ejecutada (simulación)')}
+function openDefaultModal(){$('#defaultModal').classList.add('open')}
+function setDefault(a){let s=state();s.defaultAction=a;save(s);closeModal('defaultModal');render();toast('Acción predeterminada guardada')}
+function openInfo(t,txt,actions=''){
+  $('#infoTitle').textContent=t;
+  $('#infoText').innerHTML='<p>'+esc(txt)+'</p>'+(actions||'');
+  $('#infoModal').classList.add('open');
+  hydrateIcons($('#infoModal'));
+}
+
+window.addEventListener('load',()=>{
+  hydrateIcons();
+  const s=state();
+  if(s.user){render();go('home')}else show('login');
+});
+</script>
+</body>
+</html>

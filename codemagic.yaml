@@ -1,0 +1,39 @@
+workflows:
+  blunarkbank-ios:
+    name: BlunarKBank iOS
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: com.blunark.bank
+        XCODE_SCHEME: BlunarKBank
+      # En Codemagic añade tu integración de App Store Connect y certificado/perfil.
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.blunark.bank
+    scripts:
+      - name: Instalar XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generar proyecto Xcode
+        script: |
+          xcodegen generate
+      - name: Configurar firma
+        script: |
+          xcode-project use-profiles
+      - name: Compilar IPA
+        script: |
+          xcode-project build-ipa \
+            --project "BlunarKBank.xcodeproj" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients: []
+        notify:
+          success: true
+          failure: true
