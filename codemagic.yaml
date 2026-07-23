@@ -1,33 +1,49 @@
 workflows:
-  blunarkbank-ios:
-    name: BlunarKBank iOS
+  blunarkbank-ios-unsigned:
+    name: BlunarKBank iOS sin firma
     instance_type: mac_mini_m2
     max_build_duration: 60
     environment:
       xcode: latest
-      cocoapods: default
       vars:
-        BUNDLE_ID: com.blunark.bank
         XCODE_SCHEME: BlunarKBank
-      # En Codemagic añade tu integración de App Store Connect y certificado/perfil.
-      ios_signing:
-        distribution_type: development
-        bundle_identifier: com.blunark.bank
     scripts:
       - name: Instalar XcodeGen
         script: |
           brew install xcodegen
+
       - name: Generar proyecto Xcode
         script: |
           xcodegen generate
-      - name: Configurar firma
+
+      - name: Compilar sin certificado ni perfil
         script: |
-          xcode-project use-profiles
-      - name: Compilar IPA
+          mkdir -p "$CM_BUILD_DIR/unsigned"
+          xcodebuild \
+            -project "BlunarKBank.xcodeproj" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CONFIGURATION_BUILD_DIR="$CM_BUILD_DIR/unsigned" \
+            clean build \
+            | tee "$CM_BUILD_DIR/xcodebuild-unsigned.log"
+
+      - name: Empaquetar aplicación sin firma
         script: |
-          xcode-project build-ipa \
-            --project "BlunarKBank.xcodeproj" \
-            --scheme "$XCODE_SCHEME"
+          cd "$CM_BUILD_DIR/unsigned"
+          APP_PATH=$(find . -maxdepth 1 -name "*.app" -print -quit)
+          if [ -z "$APP_PATH" ]; then
+            echo "No se encontró la aplicación compilada"
+            exit 1
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "BlunarKBank-unsigned.app.zip"
+
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/unsigned/*.app
+      - build/unsigned/*.zip
+      - build/xcodebuild-unsigned.log
       - /tmp/xcodebuild_logs/*.log
